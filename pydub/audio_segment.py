@@ -821,7 +821,7 @@ class AudioSegment(object):
             file.close()
         return obj
 
-    def export(self, out_f=None, format='mp3', codec=None, bitrate=None, parameters=None, tags=None, id3v2_version='4',
+    def export(self, out_f=None, format=None, codec=None, bitrate=None, parameters=None, tags=None, id3v2_version='4',
                cover=None):
         """
         Export an AudioSegment to a file with given options
@@ -866,6 +866,13 @@ class AudioSegment(object):
             Set cover for audio file from image file. (png or jpg)
         """
         id3v2_allowed_versions = ['3', '4']
+
+        if not format:
+            # get format from output file extension
+            format = os.path.splitext(out_f)[1][1:]
+            if format == "":
+                # use default format mp3
+                format = "mp3"
 
         if format == "raw" and (codec is not None or parameters is not None):
             raise AttributeError(
