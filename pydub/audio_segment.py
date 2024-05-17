@@ -833,6 +833,15 @@ class AudioSegment(object):
         format (string)
             Format for destination audio file.
             ('mp3', 'wav', 'raw', 'ogg' or other ffmpeg/avconv supported files)
+            TODO either rename "format" to "extension" (as in "output file extension")
+            or translate formats for ffmpeg: mka -> matroska, m4a -> ipod, ...
+            see "ffmpeg -formats" for a list of formats
+            here we need formats with "E = Muxing supported"
+            some tools pass file extensions like "mka" or "m4a" as format
+            but then ffmpeg fails with
+            "Requested output format 'mka' is not known."
+            "Requested output format 'm4a' is not a suitable output format"
+            https://github.com/jiaaro/pydub/issues/755
 
         codec (string)
             Codec used to encode the destination file.
@@ -900,7 +909,7 @@ class AudioSegment(object):
             out_f.seek(0)
             return out_f
 
-        output = NamedTemporaryFile(mode="w+b", delete=False)
+        output = NamedTemporaryFile(mode="w+b", delete=False, suffix=f".{format}")
 
         # build converter command to export
         conversion_command = [
@@ -953,7 +962,7 @@ class AudioSegment(object):
             conversion_command.extend(["-write_xing", "0"])
 
         conversion_command.extend([
-            "-f", format, output.name,  # output options (filename last)
+            output.name,  # output options (filename last)
         ])
 
         log_conversion(conversion_command)
